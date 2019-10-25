@@ -21,8 +21,9 @@ import com.opencsv.CSVReader;
 public class Model {
 
 	Set<String> validTitles = new HashSet<String>();
+	boolean render = true;
 	
-	public Model(String configPath) throws Exception{
+	public Model(String configPath, boolean setRender) throws Exception{
 		
 		CSVReader crvalidTitles = new CSVReader(
 				new FileReader(configPath + "/validTitles.csv"), '\n');
@@ -30,6 +31,7 @@ public class Model {
 			validTitles.add(row[0].toLowerCase().trim());
 		}
 		crvalidTitles.close();
+		render = setRender;
 	}
 	
 	ArrayList<String[]> execute (String mapField, String textContent) {
@@ -114,13 +116,13 @@ public class Model {
 			for (String tokens : removeTokens_author)
 				inputValue = inputValue.replace(tokens, "").trim();
 				*/
-			ArrayList<String> authList = curate_author_OSTI(inputValue);
+			ArrayList<String> authList = new ArrayList<String>();  
+			authList = curate_author_OSTI(inputValue);
 			//System.out.println(authList.size());
-			if(!authList.isEmpty())
+			if(!authList.isEmpty()) {
 				for (String auth : authList)
 					response.add(new String[] { mapField, auth });
-			//else
-				//response.add(new String[] { mapField, inputValue });
+			}
 	}
 			return response;
 		
@@ -147,8 +149,7 @@ public class Model {
 			auth = auth.replaceAll(",+", ",").replaceAll("\\s+", " ").trim();
 			if (!auth.isEmpty()) {
 				auth = auth.replaceAll("^-|-$|\\>|\\|", "").trim();
-				auth = auth.replaceAll("(?i)(^'.*)\\s+([a-z])\\.?\\s?$", "$2$1").replaceAll(",\\s*\\.?$",
-						"").trim();
+				auth = auth.replaceAll("(?i)(^'.*)\\s+([a-z])\\.?\\s?$", "$2$1").replaceAll(",\\s*\\.?$","").trim();
 				auth = auth.replaceAll("\\.(?!\\s|$)", ". ").trim();
 				auth = auth.replaceAll("(?i)(?<=\\s|^)([A-Z](?!\\.))(?=\\s|$)", "$1.").trim();
 				auth = auth.replaceAll("\\.\\s*,", ".").replaceAll(",\\s*\\.?$", "").trim();
@@ -156,7 +157,7 @@ public class Model {
 				String[] authParts = auth.split("\\s");
 				if(validTitles.contains(authParts[0].toLowerCase()))
 					auth = auth.replaceFirst("\\s", ", ");
-				if (!auth.contains(",")) {
+				if (!auth.contains(",") && render) {
 					if (!auth.matches("(?i).*\\b([a-z]\\.?|\\W+)$"))
 						auth = auth.replaceAll("(.*)\\s(.*)", "$2, $1");
 					else if (auth.matches("(?i).*?\\b[a-z]{1,2}\\.?\\b.*"))

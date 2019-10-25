@@ -14,7 +14,7 @@ public class Parse {
 	public Parse(String configPath) throws Exception {
 		// TODO Auto-generated constructor stub		
 		
-		auth_curation = new Model(configPath);
+		auth_curation = new Model(configPath,false);
 		auth_shift = new Shift(configPath);
 		cleanse = new Cleanse(configPath);
 		
